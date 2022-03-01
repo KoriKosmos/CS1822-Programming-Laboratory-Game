@@ -67,23 +67,43 @@ class Moving_Character:
 
     def draw(self, canvas):
         #spritesheet.draw()
-        canvas.draw_circle((self.pos.x, self.pos.y), 10, 1, "Green", "Green")
+        canvas.draw_circle((self.pos.x, self.pos.y), 20, 1, "Green", "Green")
 
     def update_pos(self):
         self.pos += self.vel
         self.vel *= 0.8
 
 class Player:
-    def __init__(self, moving_character, bullet, health, damage, speed):
+    def __init__(self, moving_character, bullet, health, damage, speed, width, height):
         self.moving_character = moving_character
         self.health = health
         self.damage = damage
         self.speed = speed
+        self.width = width
+        self.height = height
 
     def draw(self, canvas):
         self.moving_character.draw(canvas)
     
     def update_pos(self):
+
+        #check not out of bounds
+        if(self.moving_character.pos.x > CANVAS_WIDTH): #stuck on right wall
+            if self.moving_character.vel.x > 0:
+                self.moving_character.vel.x = 0
+        elif(self.moving_character.pos.x < 0):  #stuck on left wall
+            if self.moving_character.vel.x < 0:
+                self.moving_character.vel.x = 0
+        
+        if(self.moving_character.pos.y > CANVAS_HEIGHT): #stuck on bottom
+            if self.moving_character.vel.y > 0:
+                self.moving_character.vel.y = 0
+        elif(self.moving_character.pos.y < 0):  #stuck on top
+            if self.moving_character.vel.y < 0:
+                self.moving_character.vel.y = 0
+
+
+        #move player pos
         self.moving_character.update_pos()
     
 class Interaction:
