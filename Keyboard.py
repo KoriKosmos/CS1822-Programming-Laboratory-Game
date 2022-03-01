@@ -35,18 +35,18 @@ class Keyboard:
     
     def keyUp(self, key):
         if key == simplegui.KEY_MAP['right']:
-            self.right = True
+            self.right = False
         elif key == simplegui.KEY_MAP['left']:
-            self.left = True
+            self.left = False
         elif key == simplegui.KEY_MAP['up']:
-            self.up = True
+            self.up = False
         elif key == simplegui.KEY_MAP['down']:
-            self.down = True
+            self.down = False
         elif key == simplegui.KEY_MAP['w']:
-            self.w = True
+            self.w = False
         elif key == simplegui.KEY_MAP['a']:
-            self.a = True
+            self.a = False
         elif key == simplegui.KEY_MAP['s']:
-            self.s = True
+            self.s = False
         elif key == simplegui.KEY_MAP['d']:
-            self.d = True
+            self.d = False
