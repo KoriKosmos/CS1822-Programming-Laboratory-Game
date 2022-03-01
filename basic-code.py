@@ -8,7 +8,7 @@ except ImportError:
 # Some constants
 CANVAS_DIMS = (600, 400)
 
-IMG = simplegui.load_image('https://cdn.discordapp.com/attachments/889956680480206888/948197429101080616/Hero_Vertical.png')
+IMG = simplegui.load_image('https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Hero_Vertical.png')
 IMG_WIDTH = IMG.get_width()
 print(IMG_WIDTH)
 IMG_HEIGHT = IMG.get_height()
