@@ -5,25 +5,8 @@ try:
 except ImportError:
     import SimpleGUICS2Pygame.simpleguics2pygame as simplegui
     
-# Some constants
-CANVAS_DIMS = (600, 400)
-
-IMG = simplegui.load_image('https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Hero_Vertical.png')
-IMG_WIDTH = IMG.get_width()
-print(IMG_WIDTH)
-IMG_HEIGHT = IMG.get_height()
-IMG_CENTRE = (IMG_WIDTH/2, IMG_HEIGHT/2)
-IMG_DIMS = (IMG_WIDTH, IMG_HEIGHT)
-
-STEP = 0.5
-
-# Global variables
-img_dest_dim = (128,128)
-img_pos = [CANVAS_DIMS[0]/2, 2*CANVAS_DIMS[1]/3.]
-img_rot = 0
-
-WIDTH = 500
-HEIGHT = 500
+WIDTH = 1080
+HEIGHT = 1080
 
 class Spritesheet:
     def __init__(self, imgURL, rows, columns, num_frames):
@@ -45,10 +28,9 @@ class Spritesheet:
                 
     def draw(self, canvas, pos, direction, vel, moving):
         self.clock.tick()
-        print(moving)
         canvas.draw_image(self.img, self.frameCenters[self.currFrame], self.frameDimensions, pos, (64,64))
         if moving:
-            if self.clock.transition(30):
+            if self.clock.transition(10):
                 self.next_frame(direction)
         
     def next_frame(self, direction):
@@ -90,7 +72,7 @@ class Player:
         self.rot = 0
         self.direction = 'right'
         self.moving = False
-        spritesheetImage = 'https://cdn.discordapp.com/attachments/889956680480206888/948197429101080616/Hero_Vertical.png'
+        spritesheetImage = 'https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Hero_Vertical.png'
         self.spritesheet = Spritesheet(spritesheetImage, 4, 2, 8)
         
 
@@ -100,6 +82,46 @@ class Player:
     def update(self):
         self.pos.add(self.vel)
         self.vel.multiply(0.85)
+        if self.pos.x < self.radius:
+            self.pos.x = self.radius
+        if self.pos.x > WIDTH - self.radius:
+            self.pos.x = WIDTH - self.radius
+        if self.pos.y < self.radius:
+            self.pos.y = self.radius
+        if self.pos.y > HEIGHT - self.radius:
+            self.pos.y = HEIGHT - self.radius
+            
+            
+class Enemy:
+    def __init__(self, pos, radius=10):
+        self.pos = pos
+        self.vel = Vector()
+        self.radius = radius
+        self.rot = 0
+        self.direction = 'left'
+        self.aggro = True
+        spritesheetImage = 'https://github.com/KoriKosmos/CS1822-Programming-Laboratory-Game/blob/main/Flame_Oni.png?raw=true'
+        self.spritesheet = Spritesheet(spritesheetImage, 4, 2, 8)
+        
+
+    def draw(self, canvas):
+        self.spritesheet.draw(canvas, self.pos.get_p(), self.direction, self.vel, self.aggro)
+        
+    def update(self, player):
+        self.pos.add(self.vel)
+        if self.aggro:
+            if self.pos.y > player.pos.y:
+                self.vel.y = -1
+                self.direction = 'up'
+            if self.pos.y < player.pos.y:
+                self.vel.y = 1
+                self.direction = 'down'
+            if self.pos.x > player.pos.x:
+                self.vel.x = -1
+                self.direction = 'left'
+            if self.pos.x < player.pos.x:
+                self.vel.x = 1
+                self.direction = 'right'
         if self.pos.x < self.radius:
             self.pos.x = self.radius
         if self.pos.x > WIDTH - self.radius:
@@ -156,9 +178,10 @@ class Clock:
 
 
 class Interaction:
-    def __init__(self, player, keyboard):
+    def __init__(self, player, keyboard, enemyList):
         self.player = player
         self.keyboard = keyboard
+        self.enemylist = enemyList
 
     def update(self):
         if self.keyboard.right:
@@ -174,15 +197,43 @@ class Interaction:
             self.player.direction = 'down'
             self.player.vel.add(Vector(0,0.5))
         self.player.moving = self.keyboard.moving
+      
+    def collision(self, object1, object2):
+        xOverlap = (((object1.pos.x - object1.radius) < (object2.pos.x + object2.radius)) and ((object1.pos.x + object1.radius) > (object2.pos.x - object2.radius)))
+        yOverlap = (((object1.pos.y - object1.radius) < (object2.pos.y + object2.radius)) and ((object1.pos.y + object1.radius) > (object2.pos.y - object2.radius)))
+        return xOverlap and yOverlap
+    
+    def enemyInteraction(self):
+        removeList = []
+        for enemy in self.enemylist:
+            if self.collision(self.player, enemy):
+                removeList.append(enemy)
+        return removeList
+
 
 kbd = Keyboard()
 player = Player(Vector(WIDTH/2, HEIGHT-40), 40)
-inter = Interaction(player, kbd)
+numEnemies = 3
+enemyList = []
+for i in range(numEnemies):
+    enemyList.append(Enemy(Vector(random.randrange(0,WIDTH),random.randrange(0,HEIGHT))))
+inter = Interaction(player, kbd, enemyList)
+
+clock = Clock()
 
 def draw(canvas):
     inter.update()
     player.update()
     player.draw(canvas)
+    clock.tick()
+    if clock.transition(60):
+        enemyList.append(Enemy(Vector(random.randrange(0,WIDTH),random.randrange(0,HEIGHT))))
+    for enemy in enemyList:
+        enemy.update(player)
+        enemy.draw(canvas)
+    removeList = inter.enemyInteraction()
+    for enemy in removeList:
+        enemyList.remove(enemy)
 
 frame = simplegui.create_frame('Interactions', WIDTH, HEIGHT)
 frame.set_draw_handler(draw)
