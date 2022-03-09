@@ -158,6 +158,7 @@ class Enemy:
         self.width = width
         self.height = height
         self.speed = speed/10
+        self.chase = False
         
         
         self.spritesheet = Spritesheet(spritesheetImage, 4, 2, 8)
@@ -165,27 +166,43 @@ class Enemy:
         
         self.direction_list = ["left", "right", "up", "down", "stop"]
         
-    def update_pos(self):
+    def update_pos(self, player):
         #decide if enemy should change direction
         if(random.randint(1,50) == 50):
             self.direction = self.direction_list[random.randint(0,4)]
+            
+        self.chase_check(player)
         
         #move enemy vel
-        if self.direction == "left":
-            self.vel += Vector(-self.speed, 0)
-            self.moving = True
-        elif self.direction == "right":
-            self.vel += Vector(self.speed, 0)
-            self.moving = True
-        elif self.direction == "up":
-            self.vel += Vector(0, -self.speed)
-            self.moving = True
-        elif self.direction == "down":
-            self.vel += Vector(0, self.speed)
-            self.moving = True
-        elif self.direction == "stop":	#enemy is stopped
-            self.vel = Vector(0, 0)
-            self.moving = False
+        if self.chase:
+            if self.pos.y > player.pos.y:
+                self.vel.y = -1
+                self.direction = 'up'
+            if self.pos.y < player.pos.y:
+                self.vel.y = 1
+                self.direction = 'down'
+            if self.pos.x > player.pos.x:
+                self.vel.x = -1
+                self.direction = 'left'
+            if self.pos.x < player.pos.x:
+                self.vel.x = 1
+                self.direction = 'right'
+        else:
+            if self.direction == "left":
+                self.vel += Vector(-self.speed, 0)
+                self.moving = True
+            elif self.direction == "right":
+                self.vel += Vector(self.speed, 0)
+                self.moving = True
+            elif self.direction == "up":
+                self.vel += Vector(0, -self.speed)
+                self.moving = True
+            elif self.direction == "down":
+                self.vel += Vector(0, self.speed)
+                self.moving = True
+            elif self.direction == "stop":	#enemy is stopped
+                self.vel = Vector(0, 0)
+                self.moving = False
             
         #check not out of bounds
         if(self.pos.x > CANVAS_WIDTH - self.width): #stuck on right wall
@@ -212,7 +229,12 @@ class Enemy:
     def draw(self, canvas):
         self.spritesheet.draw(canvas, self.pos, self.direction, self.moving)
     
-    
+    def chase_check(self, object):
+        range = 50
+        xOverlap = (((self.pos.x - self.width) - range) < ((object.pos.x + object.width) + range)) and (((self.pos.x + self.width) + range) > ((object.pos.x - object.width) - range))
+        yOverlap = (((self.pos.y - self.height) - range) < ((object.pos.y + object.height) + range)) and (((self.pos.y + self.height) + range) > ((object.pos.y - object.height) - range))
+        if (xOverlap and yOverlap):
+            self.chase = True
     
 class Player:
     def __init__(self, pos, vel, direction, health, damage, speed, width, height):
@@ -322,7 +344,7 @@ class Interaction:
                 self.player.can_shoot = False
             
         for i in self.enemy_list:	#update enemy positions
-            i.update_pos()
+            i.update_pos(player)
         for i in player_bullet:	#update bullet positions
             i.update_pos()
             
