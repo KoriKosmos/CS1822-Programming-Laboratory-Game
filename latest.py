@@ -81,14 +81,15 @@ class Bullet:
         self.pos = pos
         self.vel = vel
         self.damage = damage
-        self.radius = radius
+        self.width = radius
+        self.height = radius
         #self.spritesheet = Spritesheet(spritesheetImage, 4, 2, 8)
     
     def update_pos(self):
         self.pos += self.vel
     
     def draw(self, canvas):
-        canvas.draw_circle((self.pos.x, self.pos.y), self.radius, 1, "blue", "blue")
+        canvas.draw_circle((self.pos.x, self.pos.y), self.width, 1, "blue", "blue")
         
 #keyboard handler
 class Keyboard:
@@ -153,9 +154,11 @@ class Enemy:
         self.pos = pos
         self.vel = vel
         self.direction = direction
+        self.health = health
         self.width = width
         self.height = height
         self.speed = speed/10
+        
         
         self.spritesheet = Spritesheet(spritesheetImage, 4, 2, 8)
         self.moving = False
@@ -280,9 +283,14 @@ class Interaction:
         self.player.draw(canvas)#draw player
         
     def update(self):
+        #check if player is dead
+        if self.player.health <= 0:
+            print("Game Over")
+            quit()
+        
         #give player vel based on wasd
         if self.keyboard.w:
-            self.player.direction = "up"
+            self.player.direction = "up"	#player moving up
             self.player.vel += Vector(0,-self.player.speed)
         if self.keyboard.a:
             self.player.direction = "left"
@@ -297,19 +305,19 @@ class Interaction:
        
         if self.player.can_shoot:
             if self.keyboard.left:	#player is shooting left
-                player_bullet.append(Bullet(self.player.pos, self.player.vel/4 + Vector(-3, 0), self.player.damage, "", 5))
+                player_bullet.append(Bullet(self.player.pos, self.player.vel/3 + Vector(-4, 0), self.player.damage, "", 5))
                 self.player.direction = "left"
                 self.player.can_shoot = False
             elif self.keyboard.right:	#player is shooting right
-                player_bullet.append(Bullet(self.player.pos, self.player.vel/4 + Vector(3, 0), self.player.damage, "", 5))
+                player_bullet.append(Bullet(self.player.pos, self.player.vel/3 + Vector(4, 0), self.player.damage, "", 5))
                 self.player.direction = "right"
                 self.player.can_shoot = False
             elif self.keyboard.up:	#player is shooting up
-                player_bullet.append(Bullet(self.player.pos, self.player.vel/4 + Vector(0, -3), self.player.damage, "", 5))
+                player_bullet.append(Bullet(self.player.pos, self.player.vel/3 + Vector(0, -4), self.player.damage, "", 5))
                 self.player.direction = "up"
                 self.player.can_shoot = False
             elif self.keyboard.down:	#player is shooting down
-                player_bullet.append(Bullet(self.player.pos, self.player.vel/4 + Vector(0, 3), self.player.damage, "", 5))
+                player_bullet.append(Bullet(self.player.pos, self.player.vel/3 + Vector(0, 4), self.player.damage, "", 5))
                 self.player.direction = "down"
                 self.player.can_shoot = False
             
@@ -320,24 +328,34 @@ class Interaction:
             
         self.player.update_pos() #update player position
         self.check_collisions() #check if bullets have hit enemy/player
+
         
     def check_collisions(self):
         remove_enemy = []
         remove_bullet = []
-        for bullet in player_bullet:
+        for bullet in player_bullet:	#check if player bullet has hit enemy
             for enemy in self.enemy_list:
                 if self.collision(bullet, enemy):
-                    remove_enemy.append(enemy)
+                    enemy.health -= bullet.damage #damage enemy
+                    if enemy.health <= 0:	#check if enemy is dead
+                        remove_enemy.append(enemy)
                     remove_bullet.append(bullet)
         
+        #check if enemy hits player
+        for enemy in self.enemy_list:
+            if self.collision(self.player, enemy):
+                remove_enemy.append(enemy)
+                self.player.health -= 50
+            
+        #clean up bullets and enemies
         for item in remove_enemy:
             self.enemy_list.remove(item)
         for item in remove_bullet:
             player_bullet.remove(item)
-        
+    
     def collision(self, object1, object2):
-        xOverlap = (((object1.pos.x - object1.radius) < (object2.pos.x + object2.width)) and ((object1.pos.x + object1.radius) > (object2.pos.x - object2.width)))
-        yOverlap = (((object1.pos.y - object1.radius) < (object2.pos.y + object2.height)) and ((object1.pos.y + object1.radius) > (object2.pos.y - object2.height)))
+        xOverlap = (((object1.pos.x - object1.width) < (object2.pos.x + object2.width)) and ((object1.pos.x + object1.width) > (object2.pos.x - object2.width)))
+        yOverlap = (((object1.pos.y - object1.height) < (object2.pos.y + object2.height)) and ((object1.pos.y + object1.height) > (object2.pos.y - object2.height)))
         return xOverlap and yOverlap
     
       
@@ -354,7 +372,7 @@ enemy_list.append(Enemy(Vector(1000, 400), Vector(0,0), "stop", 100, 5, 60, 50, 
 enemy_list.append(Enemy(Vector(1000, 300), Vector(0,0), "stop", 100, 5, 30, 50, enemy_url))
 
 keyboard = Keyboard()
-player = Player(Vector(100, 100), Vector(0, 0), "right", "", 5, 5, 50, 50)
+player = Player(Vector(100, 100), Vector(0, 0), "right", 150, 50, 5, 30, 30)
 interaction = Interaction(player, keyboard, enemy_list)
 
 
