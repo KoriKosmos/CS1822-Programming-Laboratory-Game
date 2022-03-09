@@ -176,16 +176,20 @@ class Enemy:
         #move enemy vel
         if self.chase:
             if self.pos.y > player.pos.y:
-                self.vel.y = -1
+                self.vel += Vector(0, -self.speed)
+                self.moving = True
                 self.direction = 'up'
             if self.pos.y < player.pos.y:
-                self.vel.y = 1
+                self.vel += Vector(0, self.speed)
+                self.moving = True
                 self.direction = 'down'
             if self.pos.x > player.pos.x:
-                self.vel.x = -1
+                self.vel += Vector(-self.speed, 0)
+                self.moving = True
                 self.direction = 'left'
             if self.pos.x < player.pos.x:
-                self.vel.x = 1
+                self.vel += Vector(self.speed, 0)
+                self.moving = True
                 self.direction = 'right'
         else:
             if self.direction == "left":
@@ -230,7 +234,7 @@ class Enemy:
         self.spritesheet.draw(canvas, self.pos, self.direction, self.moving)
     
     def chase_check(self, object):
-        range = 50
+        range = 200
         xOverlap = (((self.pos.x - self.width) - range) < ((object.pos.x + object.width) + range)) and (((self.pos.x + self.width) + range) > ((object.pos.x - object.width) - range))
         yOverlap = (((self.pos.y - self.height) - range) < ((object.pos.y + object.height) + range)) and (((self.pos.y + self.height) + range) > ((object.pos.y - object.height) - range))
         if (xOverlap and yOverlap):
@@ -388,10 +392,10 @@ enemy_bullet = []
 enemy_list = []
 #add enemy to enemy list
 enemy_url = "https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Flame_Oni.png"
-enemy_list.append(Enemy(Vector(1000, 500), Vector(0,0), "stop", 100, 5, 30, 50, enemy_url))
-enemy_list.append(Enemy(Vector(1000, 200), Vector(0,0), "stop", 100, 5, 30, 50, enemy_url))
-enemy_list.append(Enemy(Vector(1000, 400), Vector(0,0), "stop", 100, 5, 60, 50, enemy_url))
-enemy_list.append(Enemy(Vector(1000, 300), Vector(0,0), "stop", 100, 5, 30, 50, enemy_url))
+enemy_list.append(Enemy(Vector(1000, 500), Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
+enemy_list.append(Enemy(Vector(1000, 200), Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
+enemy_list.append(Enemy(Vector(1000, 400), Vector(0,0), "stop", 100, 4, 60, 50, enemy_url))
+enemy_list.append(Enemy(Vector(1000, 300), Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
 
 keyboard = Keyboard()
 player = Player(Vector(100, 100), Vector(0, 0), "right", 150, 50, 5, 30, 30)
