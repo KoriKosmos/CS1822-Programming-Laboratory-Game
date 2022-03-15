@@ -293,6 +293,7 @@ class Interaction:
         self.player = player
         self.keyboard = keyboard
         self.enemy_list = enemy_list
+        self.score = 0
         global player_bullet
         global enemy_bullet
         
@@ -307,6 +308,12 @@ class Interaction:
             i.draw(canvas)
         
         self.player.draw(canvas)#draw player
+        
+        #draw health on screen
+        canvas.draw_text("Health:"+str(self.player.health), (20, 50), 50, 'Red', 'monospace')
+        
+        #draw score on screen
+        canvas.draw_text("Score:"+str(self.score), (400, 50), 50, 'Red', 'monospace')
         
     def update(self):
         #check if player is dead
@@ -363,8 +370,10 @@ class Interaction:
             for enemy in self.enemy_list:
                 if self.collision(bullet, enemy):
                     enemy.health -= bullet.damage #damage enemy
+                    self.score += 10 #add score for hit
                     if enemy.health <= 0:	#check if enemy is dead
                         remove_enemy.append(enemy)
+                        self.score += 100 #add score for kill
                     remove_bullet.append(bullet)
         
         #check if enemy hits player
