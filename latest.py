@@ -8,7 +8,7 @@ from user304_rsf8mD0BOQ_1 import Vector
 import math   
 import random
 
-CANVAS_WIDTH = 1280
+CANVAS_WIDTH = 1080
 CANVAS_HEIGHT = 720
 
 class Spritesheet:
@@ -287,17 +287,48 @@ class Player:
     def draw(self, canvas):
         self.spritesheet.draw(canvas, self.pos, self.direction, self.moving)
 
+def mouse_handler(position):
+    global Mouse
+    Mouse1.set_position(position)
+    
+class Mouse:
+
+    def __init__(self, position):
+        self.position = position
+
+    def get_position(self):
+        return self.position
+
+    def set_position(self, position):
+        self.position = position
         
 class Interaction:
-    def __init__(self, player, keyboard, enemy_list):
+    def __init__(self, player, keyboard, mouse, enemy_list):
         self.player = player
         self.keyboard = keyboard
         self.enemy_list = enemy_list
         self.score = 0
+        self.mouse = mouse
+        self.gameState = 'menu'
+        self.lastClickPos = (0,0)
         global player_bullet
         global enemy_bullet
         
     def draw(self, canvas):
+        if self.gameState == 'menu':
+            self.menuDraw(canvas)
+        elif self.gameState == 'play':
+            self.playDraw(canvas)
+        
+    def menuDraw(self, canvas):
+        canvas.draw_text('Menu', [440,210], 100, "Red")
+        canvas.draw_text('The howls of demons resound before you', [150,310], 50, "Red")
+        canvas.draw_text('click anywhere to play', [340, 410], 50, "Gray")
+        
+        if self.lastClickPos != self.mouse.get_position():
+            self.gameState = 'play'
+        
+    def playDraw(self, canvas):
         self.update() #update positions
         #draw bullets
         for i in player_bullet:
@@ -408,14 +439,15 @@ enemy_list.append(Enemy(Vector(1000, 300), Vector(0,0), "stop", 100, 4, 30, 50, 
 
 keyboard = Keyboard()
 player = Player(Vector(100, 100), Vector(0, 0), "right", 150, 50, 5, 30, 30)
-interaction = Interaction(player, keyboard, enemy_list)
-
+Mouse1 = Mouse((0,0))
+interaction = Interaction(player, keyboard, Mouse1, enemy_list)
 
 #create frame
 frame = simplegui.create_frame("Game", CANVAS_WIDTH, CANVAS_HEIGHT)
 frame.set_draw_handler(interaction.draw)
 frame.set_canvas_background('#004D26') #set background color
-
+#Mouse handler
+frame.set_mouseclick_handler(mouse_handler)
 #keyboard handler
 frame.set_keydown_handler(keyboard.keyDown)
 frame.set_keyup_handler(keyboard.keyUp)
