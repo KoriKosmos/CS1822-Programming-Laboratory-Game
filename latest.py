@@ -241,19 +241,20 @@ class Enemy:
             self.chase = True
     
 class Player:
-    def __init__(self, pos, vel, direction, health, damage, speed, width, height):
+    def __init__(self, pos, vel, direction, health, max_health, damage, speed, width, height):
         self.pos = pos
         self.vel = vel
         self.direction = direction
         self.speed = speed/10
         self.health = health
+        self.max_health = max_health
         self.damage = damage
 
         self.width = width
         self.height = height
         
         self.moving = False
-        spritesheetImage = 'https://cdn.discordapp.com/attachments/889956680480206888/948197429101080616/Hero_Vertical.png'
+        spritesheetImage = 'https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Hero_Vertical.png'
         self.spritesheet = Spritesheet(spritesheetImage, 4, 2, 8)
     
         self.can_shoot = False #can player shoot
@@ -315,6 +316,10 @@ class Interaction:
         global player_bullet
         global enemy_bullet
         
+        self.full_heart = simplegui.load_image("https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Heart.png")
+        self.empty_heart = simplegui.load_image("https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Heart-hurt.png")
+        
+        
     def draw(self, canvas):
         if self.gameState == 'menu':
             self.menuDraw(canvas)
@@ -327,6 +332,7 @@ class Interaction:
         canvas.draw_text('click anywhere to play', [340, 410], 50, "Gray")
         
         if self.lastClickPos != self.mouse.get_position():
+            self.lastClickPos = self.mouse.get_position()
             self.gameState = 'play'
         
     def playDraw(self, canvas):
@@ -349,16 +355,35 @@ class Interaction:
                 enemy_list.append(new_enemy)
         
         #draw health on screen
-        canvas.draw_text("Health:"+str(self.player.health), (20, 50), 50, 'Red', 'monospace')
+        self.draw_health(canvas)
         
         #draw score on screen
         canvas.draw_text("Score:"+str(self.score), (400, 50), 50, 'Red', 'monospace')
         
+    def draw_health(self, canvas):
+        offset = 0
+        hearts = self.player.max_health // 50
+        full_hearts = self.player.health // 50
+        for i in range(full_hearts):
+            canvas.draw_image(self.full_heart, (32, 32), (64, 64), (50+offset, 50), (64, 64)) 
+            offset += 68
+        for i in range(hearts - full_hearts):
+            canvas.draw_image(self.empty_heart, (32, 32), (64, 64), (50+offset, 50), (64, 64)) 
+            offset += 68
+            
+        
     def update(self):
+        global enemy_list
+        global player_bullet
         #check if player is dead
         if self.player.health <= 0:
             print("Game Over")
-            quit()
+            self.player.health = self.player.max_health
+            self.gameState = "menu"
+            self.score = 0
+            self.player.pos = Vector(100, 360)
+            
+           
         
         #give player vel based on wasd
         if self.keyboard.w:
@@ -423,9 +448,11 @@ class Interaction:
             
         #clean up bullets and enemies
         for item in remove_enemy:
-            self.enemy_list.remove(item)
+            if item in enemy_list:
+                self.enemy_list.remove(item)
         for item in remove_bullet:
-            player_bullet.remove(item)
+            if item in player_bullet:
+                player_bullet.remove(item)
     
     def collision(self, object1, object2):
         xOverlap = (((object1.pos.x - object1.width) < (object2.pos.x + object2.width)) and ((object1.pos.x + object1.width) > (object2.pos.x - object2.width)))
@@ -444,14 +471,9 @@ enemy_list.append(Enemy(Vector(1000, 500), Vector(0,0), "stop", 100, 4, 30, 50, 
 enemy_list.append(Enemy(Vector(1000, 200), Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
 enemy_list.append(Enemy(Vector(1000, 400), Vector(0,0), "stop", 100, 4, 60, 50, enemy_url))
 enemy_list.append(Enemy(Vector(1000, 300), Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
-#Spawn an enemy every set interval
-clock = Clock()
-if clock.transition(60):
-    print("Spawned enemy")
-    randPos = Vector(random.randrange(0,CANVAS_WIDTH),random.randrange(0,CANVAS_HEIGHT))
-    enemy_list.append(Enemy(randPos, Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
+
 keyboard = Keyboard()
-player = Player(Vector(100, 100), Vector(0, 0), "right", 150, 50, 5, 30, 30)
+player = Player(Vector(100, 360), Vector(0, 0), "right", 150, 150, 50, 5, 30, 30)
 Mouse1 = Mouse((0,0))
 interaction = Interaction(player, keyboard, Mouse1, enemy_list)
 
