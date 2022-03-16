@@ -309,6 +309,7 @@ class Interaction:
         self.enemy_list = enemy_list
         self.score = 0
         self.mouse = mouse
+        self.clock = Clock()
         self.gameState = 'menu'
         self.lastClickPos = (0,0)
         global player_bullet
@@ -339,6 +340,11 @@ class Interaction:
             i.draw(canvas)
         
         self.player.draw(canvas)#draw player
+        self.clock.tick()
+        
+        if self.clock.transition(60):
+            randPos = Vector(random.randrange(0,CANVAS_WIDTH),random.randrange(0,CANVAS_HEIGHT))
+            enemy_list.append(Enemy(randPos, Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
         
         #draw health on screen
         canvas.draw_text("Health:"+str(self.player.health), (20, 50), 50, 'Red', 'monospace')
@@ -436,7 +442,12 @@ enemy_list.append(Enemy(Vector(1000, 500), Vector(0,0), "stop", 100, 4, 30, 50, 
 enemy_list.append(Enemy(Vector(1000, 200), Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
 enemy_list.append(Enemy(Vector(1000, 400), Vector(0,0), "stop", 100, 4, 60, 50, enemy_url))
 enemy_list.append(Enemy(Vector(1000, 300), Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
-
+#Spawn an enemy every set interval
+clock = Clock()
+if clock.transition(60):
+    print("Spawned enemy")
+    randPos = Vector(random.randrange(0,CANVAS_WIDTH),random.randrange(0,CANVAS_HEIGHT))
+    enemy_list.append(Enemy(randPos, Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
 keyboard = Keyboard()
 player = Player(Vector(100, 100), Vector(0, 0), "right", 150, 50, 5, 30, 30)
 Mouse1 = Mouse((0,0))
