@@ -462,7 +462,8 @@ class Interaction:
         return xOverlap and yOverlap
     
       
-    
+sound = simplegui.load_sound('https://github.com/KoriKosmos/CS1822-Programming-Laboratory-Game/blob/main/YouSayRun(8%20bit).ogg?raw=true')
+sound.play()
 #INITIALISATION
 player_bullet = []
 enemy_bullet = []
