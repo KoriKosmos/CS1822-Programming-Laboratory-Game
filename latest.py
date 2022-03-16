@@ -343,8 +343,10 @@ class Interaction:
         self.clock.tick()
         
         if self.clock.transition(60):
-            randPos = Vector(random.randrange(0,CANVAS_WIDTH),random.randrange(0,CANVAS_HEIGHT))
-            enemy_list.append(Enemy(randPos, Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
+            randPos = Vector(random.randrange(0,CANVAS_WIDTH),random.randrange(0,CANVAS_HEIGHT))#
+            new_enemy = Enemy(randPos, Vector(0,0), "stop", 100, 4, 30, 50, enemy_url)
+            if not new_enemy.chase_check(player):
+                enemy_list.append(new_enemy)
         
         #draw health on screen
         canvas.draw_text("Health:"+str(self.player.health), (20, 50), 50, 'Red', 'monospace')
