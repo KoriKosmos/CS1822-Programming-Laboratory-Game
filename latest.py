@@ -329,7 +329,7 @@ class Interaction:
             self.playDraw(canvas)
         
     def menuDraw(self, canvas):
-        canvas.draw_text('Menu', [440,210], 100, "Red")
+        canvas.draw_text('Forest Quest', [310,210], 100, "Red")
         canvas.draw_text('The howls of demons resound before you', [150,310], 50, "Red")
         canvas.draw_text('click anywhere to play', [340, 410], 50, "Gray")
         
