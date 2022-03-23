@@ -379,13 +379,20 @@ class Interaction:
         global player_bullet
         #check if player is dead
         if self.player.health <= 0:
+            #reset game to initial conditions
             print("Game Over")
             self.player.health = self.player.max_health
             self.gameState = "menu"
             self.score = 0
             self.player.pos = Vector(100, 360)
-            
-           
+            remove_list = []
+            #remove enemies on screen
+            for i in enemy_list:
+                remove_list.append(i)
+            for i in remove_list:
+                enemy_list.remove(i)
+            add_enemies() #add default enemies
+         
         
         #give player vel based on wasd
         if self.keyboard.w:
@@ -419,7 +426,10 @@ class Interaction:
                 player_bullet.append(Bullet(self.player.pos, self.player.vel/3 + Vector(0, 4), self.player.damage, "", 5))
                 self.player.direction = "down"
                 self.player.can_shoot = False
-            
+         
+        
+    
+        
         for i in self.enemy_list:	#update enemy positions
             i.update_pos(player)
         for i in player_bullet:	#update bullet positions
@@ -447,7 +457,16 @@ class Interaction:
             if self.collision(self.player, enemy):
                 remove_enemy.append(enemy)
                 self.player.health -= 50
-            
+        
+        
+        #check if bullet is offscreen
+        for i in player_bullet:
+            xpos = i.pos.x
+            ypos = i.pos.y
+            if xpos < 0 or ypos < 0 or xpos > CANVAS_WIDTH or ypos > CANVAS_HEIGHT:
+                if i not in remove_bullet:
+                    remove_bullet.append(i)
+      
         #clean up bullets and enemies
         for item in remove_enemy:
             if item in enemy_list:
@@ -468,13 +487,17 @@ sound.play()
 player_bullet = []
 enemy_bullet = []
 enemy_list = []
-#add enemy to enemy list
-enemy_url = "https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Flame_Oni.png"
-enemy_list.append(Enemy(Vector(1000, 500), Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
-enemy_list.append(Enemy(Vector(1000, 200), Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
-enemy_list.append(Enemy(Vector(1000, 400), Vector(0,0), "stop", 100, 4, 60, 50, enemy_url))
-enemy_list.append(Enemy(Vector(1000, 300), Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
 
+#add enemies to enemy list
+enemy_url = "https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Flame_Oni.png"
+def add_enemies():
+    global enemy_list
+    enemy_list.append(Enemy(Vector(1000, 500), Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
+    enemy_list.append(Enemy(Vector(1000, 200), Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
+    enemy_list.append(Enemy(Vector(1000, 400), Vector(0,0), "stop", 100, 4, 60, 50, enemy_url))
+    enemy_list.append(Enemy(Vector(1000, 300), Vector(0,0), "stop", 100, 4, 30, 50, enemy_url))
+add_enemies()
+    
 keyboard = Keyboard()
 player = Player(Vector(100, 360), Vector(0, 0), "right", 150, 150, 50, 5, 30, 30)
 Mouse1 = Mouse((0,0))
