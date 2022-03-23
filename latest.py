@@ -243,7 +243,7 @@ class Enemy:
 
     
 class Player:
-    def __init__(self, pos, vel, direction, health, max_health, damage, speed, width, height):
+    def __init__(self, pos, vel, direction, health, max_health, damage, speed, width, height, spritesheetImage):
         self.pos = pos
         self.vel = vel
         self.direction = direction
@@ -256,7 +256,6 @@ class Player:
         self.height = height
         
         self.moving = False
-        spritesheetImage = 'https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Hero_Vertical.png'
         self.spritesheet = Spritesheet(spritesheetImage, 4, 2, 8)
     
         self.can_shoot = False #can player shoot
@@ -306,7 +305,7 @@ class Mouse:
         self.position = position
         
 class Interaction:
-    def __init__(self, player, keyboard, mouse, enemy_list):
+    def __init__(self, player, keyboard, mouse, enemy_list, full_heart, empty_heart):
         self.player = player
         self.keyboard = keyboard
         self.enemy_list = enemy_list
@@ -318,8 +317,9 @@ class Interaction:
         global player_bullet
         global enemy_bullet
         
-        self.full_heart = simplegui.load_image("https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Heart.png")
-        self.empty_heart = simplegui.load_image("https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Heart-hurt.png")
+        
+        self.full_heart = full_heart
+        self.empty_heart = empty_heart
         
         
     def draw(self, canvas):
@@ -499,9 +499,14 @@ def add_enemies():
 add_enemies()
     
 keyboard = Keyboard()
-player = Player(Vector(100, 360), Vector(0, 0), "right", 150, 150, 50, 5, 30, 30)
+
+spritesheetImage = 'https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Hero_Vertical.png'
+player = Player(Vector(100, 360), Vector(0, 0), "right", 150, 150, 50, 5, 30, 30, spritesheetImage)
 Mouse1 = Mouse((0,0))
-interaction = Interaction(player, keyboard, Mouse1, enemy_list)
+
+full_heart = simplegui.load_image("https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Heart.png")
+empty_heart = simplegui.load_image("https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Heart-hurt.png")
+interaction = Interaction(player, keyboard, Mouse1, enemy_list, full_heart, empty_heart)
 
 #create frame
 frame = simplegui.create_frame("Game", CANVAS_WIDTH, CANVAS_HEIGHT)
