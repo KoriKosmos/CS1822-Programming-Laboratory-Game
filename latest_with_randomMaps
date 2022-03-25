@@ -432,9 +432,9 @@ class Interaction:
                           (BG_SHEET_WIDTH, BG_SHEET_HEIGHT),
                           (CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2),
                           (CANVAS_WIDTH, CANVAS_HEIGHT))
-        canvas.draw_text('Tales Of Zelmore', [210, 120], 100, "Red")
-        canvas.draw_text('The howls of demons resound before you', [150, 200], 50, "Red")
-        canvas.draw_text('click anywhere to play', [340, 680], 50, "Gray")
+        canvas.draw_text('Tales of Zelmore', [210, 120], 100, "Red")
+        canvas.draw_text('"The howls of demons echo before you"', [150, 200], 50, "Red")
+        canvas.draw_text('Click Anywhere to Play', [340, 680], 50, "Gray")
 
         if self.lastClickPos != self.mouse.get_position():
             self.lastClickPos = self.mouse.get_position()
