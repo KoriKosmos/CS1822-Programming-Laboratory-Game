@@ -269,12 +269,15 @@ class Player:
         self.health = health
         self.max_health = max_health
         self.damage = damage
+        self.hurt = False
+        hurt_imgUrl = "https://cdn.discordapp.com/attachments/889956680480206888/951062203618967583/Hero-Hurt.png"
 
         self.width = width
         self.height = height
 
         self.moving = False
         self.spritesheet = Spritesheet(spritesheetImage, 4, 2, 8)
+        self.hurtSpriteSheet = Spritesheet(hurt_imgUrl, 4, 2, 8)
 
         self.can_shoot = False  # can player shoot
         self.clock = Clock()
@@ -305,8 +308,11 @@ class Player:
                 self.can_shoot = True
 
     def draw(self, canvas):
-        self.spritesheet.draw(canvas, self.pos, self.direction, self.moving)
-
+        if self.hurt:
+            self.hurtSpriteSheet.draw(canvas, self.pos, self.direction, self.moving)
+        else:                          
+            self.spritesheet.draw(canvas, self.pos, self.direction, self.moving)
+    
 
 def mouse_handler(position):
     global Mouse
@@ -379,6 +385,7 @@ class Interaction:
         self.clock = Clock()
         self.gameState = 'menu'
         self.lastClickPos = (0, 0)
+        self.lastHurttime = 0
         global player_bullet
         global enemy_bullet
 
@@ -403,6 +410,7 @@ class Interaction:
         canvas.draw_text('Game Over', [310, 120], 100, "Red")
         canvas.draw_text('Your score was: ' + str(self.final_score), [350, 200], 50, "Red")
         canvas.draw_text('click anywhere to return to menu', [220, 680], 50, "Gray")
+        self.player.hurt = False
 
         if self.lastClickPos != self.mouse.get_position():
             self.lastClickPos = self.mouse.get_position()
@@ -414,7 +422,7 @@ class Interaction:
                           (BG_SHEET_WIDTH, BG_SHEET_HEIGHT),
                           (CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2),
                           (CANVAS_WIDTH, CANVAS_HEIGHT))
-        canvas.draw_text('Forest Quest', [310, 120], 100, "Red")
+        canvas.draw_text('Tales Of Zelmore', [210, 120], 100, "Red")
         canvas.draw_text('The howls of demons resound before you', [150, 200], 50, "Red")
         canvas.draw_text('click anywhere to play', [340, 680], 50, "Gray")
 
@@ -523,6 +531,9 @@ class Interaction:
             i.update_pos()
 
         self.player.update_pos()  # update player position
+        self.lastHurttime = self.lastHurttime // 60
+        if self.clock.transition(self.lastHurttime + 180):
+            self.player.hurt = False
         self.check_collisions()  # check if bullets have hit enemy/player
 
     def check_collisions(self):
@@ -540,9 +551,11 @@ class Interaction:
 
         # check if enemy hits player
         for enemy in self.enemy_list:
-            if self.collision(self.player, enemy):
+            if self.collision(self.player, enemy) and not self.player.hurt:
                 remove_enemy.append(enemy)
                 self.player.health -= 50
+                self.player.hurt = True
+                self.lastHurtTime = self.clock.time
 
         # check if bullet is offscreen
         for i in player_bullet:
