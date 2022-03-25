@@ -467,7 +467,7 @@ class Interaction:
         self.draw_health(canvas)
 
         # draw score on screen
-        canvas.draw_text("Score:" + str(self.score), (400, 50), 50, 'Red', 'monospace')
+        canvas.draw_text("Score:" + str(self.score), (400, 50), 50, 'Yellow', 'monospace')
 
     def draw_health(self, canvas):
         offset = 0
