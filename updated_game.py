@@ -331,8 +331,6 @@ class Mouse:
         self.position = position
 
 
-# ----------------
-
 class Map:
     def __init__(self, imgurl, width, height, columns, rows):
         self.img = imgurl
@@ -371,8 +369,6 @@ class Map:
         canvas.draw_image(self.img, centre_source, source_size, centre_dest, size_dest)
 
 
-# ----------------
-
 class Interaction:
     def __init__(self, player, keyboard, mouse, enemy_list, full_heart, empty_heart, game_map):
         self.game_map = game_map
@@ -395,10 +391,25 @@ class Interaction:
     def draw(self, canvas):
         if self.gameState == 'menu':
             self.menuDraw(canvas)
+        elif self.gameState == 'instructions':
+            self.instructions(canvas)
         elif self.gameState == 'play':
             self.playDraw(canvas)
         elif self.gameState == "over":
             self.overDraw(canvas)
+            
+    def instructions(self, canvas):
+        canvas.draw_text('How to play: ', [310, 120], 80, "Red")
+        canvas.draw_text('The objective is to survive the onslaught of demons', [110, 240], 40, "Red")
+        canvas.draw_text('Use the WASD keys to move', [110, 340], 40, "Red")
+        canvas.draw_text('Use the arrow keys to fire your weapon', [110, 440], 40, "Red")
+        canvas.draw_text('Gain points for every demon you destroy', [110, 540], 40, "Red")
+        canvas.draw_text('click anywhere to play', [320, 680], 50, "Gray")
+        self.player.hurt = False
+
+        if self.lastClickPos != self.mouse.get_position():
+            self.lastClickPos = self.mouse.get_position()
+            self.gameState = 'play'
 
     def overDraw(self, canvas):
         canvas.draw_image(BG_IMG,
@@ -424,11 +435,11 @@ class Interaction:
                           (CANVAS_WIDTH, CANVAS_HEIGHT))
         canvas.draw_text('Tales Of Zelmore', [210, 120], 100, "Red")
         canvas.draw_text('The howls of demons resound before you', [150, 200], 50, "Red")
-        canvas.draw_text('click anywhere to play', [340, 680], 50, "Gray")
+        canvas.draw_text('click anywhere to begin', [340, 680], 50, "Gray")
 
         if self.lastClickPos != self.mouse.get_position():
             self.lastClickPos = self.mouse.get_position()
-            self.gameState = 'play'
+            self.gameState = 'instructions'
 
     def playDraw(self, canvas):
         self.update()  # update positions
@@ -609,7 +620,6 @@ spritesheetImage = 'https://raw.githubusercontent.com/KoriKosmos/CS1822-Programm
 player = Player(Vector(100, 360), Vector(0, 0), "right", 150, 150, 50, 5, 30, 30, spritesheetImage)
 Mouse1 = Mouse((0, 0))
 
-# ----------------
 game_map = Map(
     IMG,
     SHEET_WIDTH,
@@ -617,7 +627,7 @@ game_map = Map(
     SHEET_COLUMNS,
     SHEET_ROWS
 )
-# ----------------
+
 
 full_heart = simplegui.load_image(
     "https://raw.githubusercontent.com/KoriKosmos/CS1822-Programming-Laboratory-Game/main/Heart.png")
@@ -630,7 +640,7 @@ interaction = Interaction(player, keyboard, Mouse1, enemy_list, full_heart, empt
 # create frame
 frame = simplegui.create_frame("Game", CANVAS_WIDTH, CANVAS_HEIGHT)
 frame.set_draw_handler(interaction.draw)
-frame.set_canvas_background('#004D26')  # set background color
+frame.set_canvas_background('Black')  # set background color
 # Mouse handler
 frame.set_mouseclick_handler(mouse_handler)
 # keyboard handler
